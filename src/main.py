@@ -14,17 +14,19 @@ dropbox.download_all()
 async def test():
     return {"message": "Hello"}
 
-@app.get('/getsounds/{guild_id}')
+@app.get('/sounds/{guild_id}')
 async def get_sounds(guild_id: str):
     try:
         files = os.listdir(f'./sounds/{guild_id}/')
+        files.sort()
         ret = {"files": files}
     except:
         raise HTTPException(status_code=404, detail="Wrong Guild Id")
     return ret
 
-@app.post('/savesound/{guild_id}')
+@app.post('/sounds/{guild_id}')
 async def save_sound(guild_id: str):
+    # TODO: YES
     return {"message": "save sound"}
     
 if __name__ == "__main__":
