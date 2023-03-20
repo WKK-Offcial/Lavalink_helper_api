@@ -38,6 +38,7 @@ async def save_sound(guild_id: str, body: SoundModel):
     print(body.file_name)
     if not body.file_name.endswith('.mp3'):
         raise HTTPException(status_code=418, detail="fsdfsdffs The fuck is this!? .mp3 only")
+    body.file_name = body.file_name.lower()
     file_data = base64.b64decode(body.file_data)
     with open(f'./sounds/{guild_id}/{body.file_name}', "wb") as f: # write binary to file
         f.write(file_data)
