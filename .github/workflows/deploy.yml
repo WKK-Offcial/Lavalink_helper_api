@@ -3,6 +3,7 @@ name: Deploy on EC2
 on:
   push:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   docker_build:
@@ -48,7 +49,7 @@ jobs:
         DROPBOX_REFRESH_TOKEN: ${{secrets.DROPBOX_REFRESH_TOKEN}}
       with:
         host: ${{secrets.BOI_HOSTNAME}}
-        username: ec2-user
+        username: opc
         key: ${{secrets.BOI_PRIVATE_KEY}}
         envs: DOCKER_IMAGE, DOCKER_CONTAINER_NAME, DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN
         script_stop: true
