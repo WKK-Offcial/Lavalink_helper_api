@@ -32,43 +32,20 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: ghcr.io/wkk-offcial/lavalink_helper_api:latest
+          tags: ghcr.io/wkk-offcial/lavalink_helper_api:latest,ghcr.io/wkk-offcial/lavalink_helper_api:{{ github.sha }}
 
-  deploy:
-    name: Deploy to EC2
-    needs: docker_build
+  trigger_deploy:
+    name: Trigger deployment pipeline
     runs-on: ubuntu-latest
+    needs: docker_build
     steps:
-    - name: Deploy Image on EC2
-      uses: appleboy/ssh-action@v0.1.8
-      env:
-        DOCKER_IMAGE: "ghcr.io/wkk-offcial/lavalink_helper_api:latest"
-        DOCKER_CONTAINER_NAME: "lavalink_helper_api"
-        DROPBOX_APP_KEY: ${{secrets.DROPBOX_APP_KEY}}
-        DROPBOX_APP_SECRET: ${{secrets.DROPBOX_APP_SECRET}}
-        DROPBOX_REFRESH_TOKEN: ${{secrets.DROPBOX_REFRESH_TOKEN}}
-      with:
-        host: ${{secrets.BOI_HOSTNAME}}
-        username: opc
-        key: ${{secrets.BOI_PRIVATE_KEY}}
-        envs: DOCKER_IMAGE, DOCKER_CONTAINER_NAME, DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN
-        script_stop: true
-        script: |
-          if [[ -z "$(docker network ls | grep wkk-network)" ]]; then
-            docker network create wkk-network
-          fi
-          if [[ -z "$(docker volume ls | grep sounds)" ]]; then
-            docker volume create sounds
-          fi
-          docker pull $DOCKER_IMAGE
-          docker stop $DOCKER_CONTAINER_NAME && docker rm -fv $DOCKER_CONTAINER_NAME || true
-          docker run -d \
-                     -p 36970:8000 \
-                     -v sounds:/home/sounds \          
-                     -e DROPBOX_APP_KEY=$DROPBOX_APP_KEY \
-                     -e DROPBOX_APP_SECRET=$DROPBOX_APP_SECRET \
-                     -e DROPBOX_REFRESH_TOKEN=$DROPBOX_REFRESH_TOKEN \
-                     --restart unless-stopped \
-                     --network="wkk-network" \
-                     --name $DOCKER_CONTAINER_NAME $DOCKER_IMAGE
-          docker image prune <<< y
+      - name: Trigger deployment pipeline
+        run: |
+          curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.DEPLOY_API_TOKEN }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/WKK-Offcial/bot_deployment/actions/workflows/deploy.yml/dispatches \
+          -d '{"ref":"master"}'
+
