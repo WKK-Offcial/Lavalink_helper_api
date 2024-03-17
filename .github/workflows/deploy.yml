@@ -32,7 +32,7 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: ghcr.io/wkk-offcial/lavalink_helper_api:latest,ghcr.io/wkk-offcial/lavalink_helper_api:{{ github.sha }}
+          tags: ghcr.io/wkk-offcial/lavalink_helper_api:latest,ghcr.io/wkk-offcial/lavalink_helper_api:${{ github.sha }}
 
   trigger_deploy:
     name: Trigger deployment pipeline
